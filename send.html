@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام ارسال حوالة</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    font-family:'Cairo', sans-serif;
+    background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    background:white;
+    width:420px;
+    padding:25px;
+    border-radius:20px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.3);
+}
+
+h2{
+    text-align:center;
+    margin-bottom:20px;
+    color:#2c5364;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin:8px 0;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:14px;
+}
+
+input:focus,select:focus{
+    outline:none;
+    border-color:#2c5364;
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border:none;
+    border-radius:10px;
+    background:#2c5364;
+    color:white;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#203a43;
+}
+
+.result{
+    margin-top:15px;
+    padding:10px;
+    background:#f1f1f1;
+    border-radius:10px;
+    font-size:14px;
+    display:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>ارسال حوالة</h2>
+
+<input type="text" id="sender" placeholder="اسم المرسل">
+<input type="text" id="receiver" placeholder="اسم المستلم">
+<input type="text" id="phone" placeholder="رقم المستلم مثال 9677xxxxxxx">
+<input type="number" id="amount" placeholder="المبلغ">
+
+<select id="wallet">
+<option value="نقدي">نقدي</option>
+<option value="محفظة جيب">محفظة جيب</option>
+<option value="محفظة جوالي">محفظة جوالي</option>
+<option value="محفظة كاش">محفظة كاش</option>
+</select>
+
+<button onclick="sendTransfer()">ارسال الحوالة</button>
+
+<div class="result" id="resultBox"></div>
+
+</div>
+
+<script>
+
+function generateTransferNumber(){
+    return "TR" + Math.floor(100000 + Math.random() * 900000);
+}
+
+function sendTransfer(){
+
+    var sender = document.getElementById("sender").value.trim();
+    var receiver = document.getElementById("receiver").value.trim();
+    var phone = document.getElementById("phone").value.trim();
+    var amount = document.getElementById("amount").value.trim();
+    var wallet = document.getElementById("wallet").value;
+
+    if(!sender || !receiver || !phone || !amount){
+        alert("يرجى تعبئة جميع الحقول");
+        return;
+    }
+
+    var transferNumber = generateTransferNumber();
+
+    var transferData = {
+        number: transferNumber,
+        sender: sender,
+        receiver: receiver,
+        phone: phone,
+        amount: amount,
+        wallet: wallet,
+        date: new Date().toLocaleString()
+    };
+
+    // تخزين في LocalStorage
+    var transfers = JSON.parse(localStorage.getItem("transfers")) || [];
+    transfers.push(transferData);
+    localStorage.setItem("transfers", JSON.stringify(transfers));
+
+    var message =
+    "يرجى مراجعة اقرب صراف \n\n" +
+    "رقم الحوالة: " + transferNumber + "\n" +
+    "المرسل: " + sender + "\n" +
+    "المبلغ: " + amount + "\n" +
+    "نوع التحويل: " + wallet;
+
+    var resultBox = document.getElementById("resultBox");
+    resultBox.style.display = "block";
+    resultBox.innerHTML = " تم إنشاء الحوالة<br>رقم الحوالة: <b>" + transferNumber + "</b>";
+
+    var url = "https://wa.me/" + phone + "?text=" + encodeURIComponent(message);
+    window.open(url, "_blank");
+
+}
+
+</script>
+
+</body>
+</html>
